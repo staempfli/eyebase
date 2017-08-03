@@ -10,7 +10,7 @@ Library to fetch information from the eyebase api
 Requirements
 ------------
 - PHP >= 7.0.*
-- guzzle/guzzle >= 6.3.*
+- guzzlehttp/guzzle >= 6.3.*
 
 
 Support
