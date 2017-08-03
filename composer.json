@@ -1,0 +1,23 @@
+{
+  "name": "staempfli/eyebase",
+  "description": "Eyebase API Connect",
+  "keywords": ["eyebase", "api"],
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Marcel Hauri",
+      "email": "marcel.hauri@staempfli.com"
+    }
+  ],
+  "require": {
+    "php": "^7.0",
+    "guzzle/guzzle": "^6.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^4.5"
+  },
+  "autoload": {
+    "psr-4": { "Staempfli\\Eyebase\\": "src/Staempfli/Eyebase/" }
+  }
+}
