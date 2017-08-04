@@ -24,35 +24,6 @@ class Api extends Eyebase
     }
 
     /**
-     * @param array $params
-     * @return string
-     */
-    public function request(array $params = [])
-    {
-        $parameters = array_merge($this->getDefaultParams(), $params);
-        $url = sprintf(
-            '%s/api/%d/webmill.php?%s',
-            rtrim($this->getUrl(), '/'),
-            $this->getVersion(),
-            http_build_query($parameters)
-        );
-
-        $response = $this->client->get($url);
-        $content = $response->getBody()->getContents();
-        return $this->convertXmlToJson($content);
-    }
-
-    /**
-     * @param string $xml
-     * @return string
-     */
-    private function convertXmlToJson(string $xml)
-    {
-        $simpleXMLElement = simplexml_load_string($xml, null, LIBXML_NOCDATA);
-        return json_encode($simpleXMLElement);
-    }
-
-    /**
      * @return string
      */
     public function getApiVersion()
@@ -69,11 +40,18 @@ class Api extends Eyebase
     }
 
     /**
+     * @param int $id
      * @return string
      */
-    public function getFolderTree()
+    public function getFolderTree(int $id = 0)
     {
-        return $this->request(['qt' => 'ftree']);
+        $params = ['qt' => 'ftree'];
+
+        if ($id) {
+            $params['folderid'] = $id;
+        }
+
+        return $this->request($params);
     }
 
     /**
@@ -93,11 +71,96 @@ class Api extends Eyebase
     }
 
     /**
+     * @param int $id
+     * @return string
+     */
+    public function getMediaAssetDetails(int $id)
+    {
+        return $this->request(
+            [
+                'qt' => 'd',
+                'maid' => $id
+            ]
+        );
+    }
+
+    /**
      * @param string $text
      * @return string
      */
     public function fullTextSearch(string $text)
     {
         return $this->request(['ftx' => $text]);
+    }
+
+    /**
+     * @param array $params
+     * @return string
+     */
+    public function request(array $params = [])
+    {
+        $parameters = array_merge($this->getDefaultParams(), $params);
+        $url = sprintf(
+            '%s/api/%d/webmill.php?%s',
+            rtrim($this->getUrl(), '/'),
+            $this->getVersion(),
+            http_build_query($parameters)
+        );
+
+        $response = $this->client->get($url);
+        $content = $response->getBody()->getContents();
+        return $this->formatOutput($content);
+    }
+
+    /**
+     * @param $content
+     * @return array|\SimpleXMLElement|string
+     */
+    private function formatOutput($content)
+    {
+        switch ($this->getOutputFormat()) {
+            case 'xml':
+                $output = $this->convertContentToXml($content);
+                break;
+            case 'json':
+                $output = $this->convertContentToJson($content);
+                break;
+            case 'array':
+                $output = $this->convertContentToArray($content);
+                break;
+            default:
+                $output = $content;
+                break;
+        }
+        return $output;
+    }
+
+    /**
+     * @param string $content
+     * @return \SimpleXMLElement
+     */
+    private function convertContentToXml(string $content)
+    {
+        return simplexml_load_string($content, null, LIBXML_NOCDATA);
+    }
+
+    /**
+     * @param string $content
+     * @return string
+     */
+    private function convertContentToJson(string $content)
+    {
+        $xml = $this->convertContentToXml($content);
+        return json_encode($xml);
+    }
+
+    /**
+     * @param string $content
+     * @return array
+     */
+    private function convertContentToArray(string $content)
+    {
+        $json = $this->convertContentToJson($content);
+        return json_decode($json, true);
     }
 }

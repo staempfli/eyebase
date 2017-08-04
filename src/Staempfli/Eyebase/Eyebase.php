@@ -5,6 +5,7 @@ namespace Staempfli\Eyebase;
 abstract class Eyebase
 {
     const DEFAULT_API_VERSION = 1;
+    const DEFAULT_OUTPUT_FORMAT = 'xml';
 
     /**
      * @var int
@@ -26,6 +27,10 @@ abstract class Eyebase
      * @var string
      */
     private $token = '';
+    /**
+     * @var string
+     */
+    private $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
     /**
      * @var array
      */
@@ -121,6 +126,26 @@ abstract class Eyebase
     public function setToken(string $token)
     {
         $this->token = $token;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOutputFormat()
+    {
+        return $this->outputFormat;
+    }
+
+    /**
+     * @param string $outputFormat
+     * @return $this
+     */
+    public function setOutputFormat(string $outputFormat)
+    {
+        if (in_array($outputFormat, ['xml', 'json', 'array'])) {
+            $this->outputFormat = $outputFormat;
+        }
         return $this;
     }
 
