@@ -3,7 +3,7 @@
   "description": "Eyebase API Connect",
   "keywords": ["eyebase", "api"],
   "type": "library",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "authors": [
     {
       "name": "Marcel Hauri",
