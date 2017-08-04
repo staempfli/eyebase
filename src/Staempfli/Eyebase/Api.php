@@ -40,15 +40,15 @@ class Api extends Eyebase
     }
 
     /**
-     * @param int $id
+     * @param int $folderId
      * @return string
      */
-    public function getFolderTree(int $id = 0)
+    public function getFolderTree(int $folderId = 0)
     {
         $params = ['qt' => 'ftree'];
 
-        if ($id) {
-            $params['folderid'] = $id;
+        if ($folderId) {
+            $params['folderid'] = $folderId;
         }
 
         return $this->request($params);
@@ -71,15 +71,15 @@ class Api extends Eyebase
     }
 
     /**
-     * @param int $id
+     * @param int $mediaAssetId
      * @return string
      */
-    public function getMediaAssetDetails(int $id)
+    public function getMediaAssetDetails(int $mediaAssetId)
     {
         return $this->request(
             [
                 'qt' => 'd',
-                'maid' => $id
+                'maid' => $mediaAssetId
             ]
         );
     }
