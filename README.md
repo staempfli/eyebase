@@ -45,7 +45,7 @@ $version = $api->setOutputFormat('array')->getApiVersion();
  */
 
 // Example
-$mediaAsseDetail = $api->setOutputFormat('array')->getMediaAssetDetails(20133);
+$mediaAssetDetail = $api->setOutputFormat('array')->getMediaAssetDetails(20133);
 /**
  * 
  * Array
