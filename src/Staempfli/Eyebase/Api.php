@@ -32,6 +32,18 @@ class Api extends Eyebase
     }
 
     /**
+     * @param string $username
+     * @param string $password
+     * @return string
+     */
+    public function login(string $username, string $password)
+    {
+        $this->setUsername($username);
+        $this->setPassword($password);
+        return $this->request(['qt' => 'login']);
+    }
+
+    /**
      * @return string
      */
     public function getLoginStatus()
