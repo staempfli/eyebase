@@ -1,12 +1,25 @@
 <?php
-
+/**
+ * @copyright Copyright © 2017 Stämpfli AG. All rights reserved.
+ * @author    marcel.hauri@staempfli.com
+ */
 namespace Staempfli\Eyebase;
 
+use GuzzleHttp\Client;
+
+/**
+ * Class Eyebase
+ * @package Staempfli\Eyebase
+ */
 abstract class Eyebase
 {
     const DEFAULT_API_VERSION = 1;
     const DEFAULT_OUTPUT_FORMAT = 'xml';
 
+    /**
+     * @var Client
+     */
+    private $client;
     /**
      * @var int
      */
@@ -40,11 +53,20 @@ abstract class Eyebase
     ];
 
     /**
-     * @return int
+     * Eyebase constructor.
+     * @param string $url
+     * @param string $token
      */
-    public function getVersion()
+    public function __construct(string $url = '', string $token = '')
     {
-        return $this->version;
+        $this->client = new Client();
+        $this->setUrl($url);
+        $this->setToken($token);
+    }
+
+    public function getVersion() : int
+    {
+        return (int) $this->version;
     }
 
     /**
@@ -57,10 +79,7 @@ abstract class Eyebase
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getUrl()
+    public function getUrl() : string
     {
         return $this->url;
     }
@@ -75,10 +94,7 @@ abstract class Eyebase
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getUsername()
+    public function getUsername() : string
     {
         return $this->username;
     }
@@ -93,10 +109,7 @@ abstract class Eyebase
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getPassword()
+    public function getPassword() : string
     {
         return $this->password;
     }
@@ -111,10 +124,7 @@ abstract class Eyebase
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getToken()
+    public function getToken() : string
     {
         return $this->token;
     }
@@ -150,14 +160,70 @@ abstract class Eyebase
     }
 
     /**
-     * @return array
+     * @param array $params
+     * @return array|\SimpleXMLElement|string
      */
-    protected function getDefaultParams()
+    public function request(array $params = [])
+    {
+        $parameters = array_merge($this->getDefaultParams(), $params);
+        $url = sprintf(
+            '%s/api/%d/webmill.php?%s',
+            rtrim($this->getUrl(), '/'),
+            $this->getVersion(),
+            http_build_query($parameters)
+        );
+
+        $response = $this->client->get($url);
+        $content = $response->getBody()->getContents();
+        return $this->formatOutput($content);
+    }
+
+    protected function getDefaultParams() : array
     {
         $params = $this->defaultParams;
         $params['benutzer'] = $this->getUsername();
         $params['ben_kennung'] = $this->getPassword();
         $params['token'] = $this->getToken();
         return array_filter($params);
+    }
+
+    /**
+     * @param $content
+     * @return array|\SimpleXMLElement|string
+     */
+    private function formatOutput($content)
+    {
+        switch ($this->getOutputFormat()) {
+            case 'xml':
+                $output = $this->convertContentToXml($content);
+                break;
+            case 'json':
+                $output = $this->convertContentToJson($content);
+                break;
+            case 'array':
+                $output = $this->convertContentToArray($content);
+                break;
+            default:
+                $output = $content;
+                break;
+        }
+        return $output;
+    }
+
+    private function convertContentToXml(string $content) : \SimpleXMLElement
+    {
+        return simplexml_load_string($content, null, LIBXML_NOCDATA);
+    }
+
+    private function convertContentToJson(string $content) : string
+    {
+        $xml = $this->convertContentToXml($content);
+        return json_encode($xml);
+    }
+
+    private function convertContentToArray(string $content) : array
+    {
+        $json = $this->convertContentToJson($content);
+        return json_decode($json, true);
     }
 }
