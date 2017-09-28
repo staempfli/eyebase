@@ -3,7 +3,7 @@
 let app = require("express")();
 
 /* eslint complexity: "off" */
-app.get("/api/1/webmill.php", function (request, response) {
+app.get("/webmill.php", function (request, response) {
     var query = request.query.qt;
     switch (query) {
         case "version":
