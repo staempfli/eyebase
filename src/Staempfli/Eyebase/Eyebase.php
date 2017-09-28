@@ -139,10 +139,7 @@ abstract class Eyebase
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getOutputFormat()
+    public function getOutputFormat() : string
     {
         return $this->outputFormat;
     }
