@@ -13,17 +13,11 @@ use GuzzleHttp\Client;
  */
 abstract class Eyebase
 {
-    const DEFAULT_API_VERSION = 1;
     const DEFAULT_OUTPUT_FORMAT = 'xml';
-
     /**
      * @var Client
      */
     private $client;
-    /**
-     * @var int
-     */
-    private $version = self::DEFAULT_API_VERSION;
     /**
      * @var string
      */
@@ -59,24 +53,9 @@ abstract class Eyebase
      */
     public function __construct(string $url = '', string $token = '')
     {
-        $this->client = new Client();
+        $this->client = new Client(['cookies' => true]);
         $this->setUrl($url);
         $this->setToken($token);
-    }
-
-    public function getVersion() : int
-    {
-        return (int) $this->version;
-    }
-
-    /**
-     * @param int $version
-     * @return $this
-     */
-    public function setVersion(int $version)
-    {
-        $this->version = $version;
-        return $this;
     }
 
     public function getUrl() : string
@@ -164,9 +143,8 @@ abstract class Eyebase
     {
         $parameters = array_merge($this->getDefaultParams(), $params);
         $url = sprintf(
-            '%s/api/%d/webmill.php?%s',
+            '%s/webmill.php?%s',
             rtrim($this->getUrl(), '/'),
-            $this->getVersion(),
             http_build_query($parameters)
         );
 
