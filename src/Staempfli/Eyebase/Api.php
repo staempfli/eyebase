@@ -1,7 +1,14 @@
 <?php
-
+/**
+ * @copyright Copyright © 2017 Stämpfli AG. All rights reserved.
+ * @author Marcel Hauri <marcel.hauri@staempfli.com>
+ */
 namespace Staempfli\Eyebase;
 
+/**
+ * Class Api
+ * @package Staempfli\Eyebase
+ */
 class Api extends Eyebase
 {
     /**

@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright Copyright © 2017 Stämpfli AG. All rights reserved.
- * @author    marcel.hauri@staempfli.com
+ * @author Marcel Hauri <marcel.hauri@staempfli.com>
  */
 namespace Staempfli\Eyebase;
 
