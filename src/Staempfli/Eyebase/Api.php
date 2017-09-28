@@ -81,7 +81,7 @@ class Api extends Eyebase
      * @param string $text
      * @return array|\SimpleXMLElement|string
      */
-    public function fullTextSearch(string $text) : string
+    public function fullTextSearch(string $text)
     {
         return $this->request(['ftx' => $text]);
     }
