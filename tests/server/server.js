@@ -2,6 +2,7 @@
 
 let app = require("express")();
 
+/* eslint complexity: "off" */
 app.get("/api/1/webmill.php", function (request, response) {
     var query = request.query.qt;
     switch (query) {
@@ -52,5 +53,5 @@ let server = app.listen(8082, function () {
     const host = "localhost";
     const port = server.address().port;
 
-    console.log("Testing server listening at http://%s:%s", host, port);
+    console.log("Testing server listening at http://%s:%s", host, port); // eslint-disable-line no-console
 });
