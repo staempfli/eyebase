@@ -6,6 +6,7 @@
 namespace Staempfli\Eyebase;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Response;
 
 /**
  * Class Eyebase
@@ -150,6 +151,15 @@ abstract class Eyebase
 
         $response = $this->client->get($url);
         $content = $response->getBody()->getContents();
+
+        if(!$this->isResponseValid($response)) {
+            throw new \Exception(sprintf('Invalid Response: %s', $response->getReasonPhrase()));
+        }
+
+        if($this->hasContentErrors($content)) {
+            throw new \Exception(sprintf('Eyebase Error: %s', $this->convertContentToJson($content)));
+        }
+
         return $this->formatOutput($content);
     }
 
@@ -160,6 +170,23 @@ abstract class Eyebase
         $params['ben_kennung'] = $this->getPassword();
         $params['token'] = $this->getToken();
         return array_filter($params);
+    }
+
+    private function isResponseValid(Response $response) : bool
+    {
+        if($response->getReasonPhrase() === 'OK') {
+            return true;
+        }
+        return false;
+    }
+
+    private function hasContentErrors(string $content) : bool
+    {
+        $content = $this->convertContentToXml($content);
+        if($content->error) {
+            return true;
+        }
+        return false;
     }
 
     /**
