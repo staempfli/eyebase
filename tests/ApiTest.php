@@ -51,7 +51,34 @@ class ApiTest extends PHPUnit_Framework_TestCase
 
     public function testLoginFailed()
     {
-        $result = $this->api->login('api', 'test');
-        $this->assertSame('Login failed', (string) $result->user->message);
+        try {
+            $this->api->login('api', 'test');
+        } catch (\Exception $e) {
+            $this->assertSame('Eyebase Error: {"error":{"id":"300","message":"Login error. For details see content of the eyebase_message tag.","eyebase_message":"Benutzername oder Passwort ungueltig."}}', $e->getMessage());
+        }
+    }
+
+    public function testLogout()
+    {
+        $result = $this->api->logout();
+        $this->assertSame('Logged out successfully.', (string) $result->message->text);
+    }
+
+    public function testAvailableMediaAssetTypes()
+    {
+        $result = $this->api->getAvailableMediaAssetTypes();
+        $this->assertSame(2, (int) $result->mediaassettypes['count']);
+        $this->assertSame(501, (int) $result->mediaassettypes[0]->mediaassettype->id);
+        $this->assertSame('Bilder', (string) $result->mediaassettypes[0]->mediaassettype->name);
+    }
+
+    public function testGetFolderTree()
+    {
+        $result = $this->api->getFolderTree();
+        $this->assertSame(1300, (int) $result->folder->id);
+        $this->assertSame('DEMOFOLDER', (string) $result->folder->name);
+        $this->assertSame(1, (int) $result->folder->subfolders['count']);
+        $this->assertSame(1301, (int) $result->folder->subfolders[0]->folder->id);
+        $this->assertSame('DEMO', (string) $result->folder->subfolders[0]->folder->name);
     }
 }

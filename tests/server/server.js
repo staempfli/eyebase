@@ -30,21 +30,90 @@ app.get("/webmill.php", function (request, response) {
                 response.end("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
                     "<eyebase_api>" +
                     "<user>" +
-                    "<id><![CDATA[anonymous]]></id>" +
-                    "<login><![CDATA[api]]></login>" +
-                    "<name><![CDATA[user api]]></name>" +
-                    "<message><![CDATA[Login successful]]></message>" +
+                    "<id ><![CDATA[2004]]></id>" +
+                    "<login ><![CDATA[demo]]></login>" +
+                    "<name ><![CDATA[DEMO API]]></name>" +
+                    "<message ><![CDATA[Login successful]]></message>" +
                     "</user>" +
                     "</eyebase_api>");
             } else {
                 response.end("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
                     "<eyebase_api>" +
-                    "<user>" +
-                    "<id><![CDATA[anonymous]]></id>" +
-                    "<message><![CDATA[Login failed]]></message>" +
-                    "</user>" +
+                    "<error>" +
+                    "<id><![CDATA[300]]></id>" +
+                    "<message><![CDATA[Login error. For details see content of the eyebase_message tag.]]></message>" +
+                    "<eyebase_message><![CDATA[Benutzername oder Passwort ungueltig.]]></eyebase_message>" +
+                    "</error>" +
                     "</eyebase_api>");
             }
+            break;
+        case "logout":
+            response.end("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
+                "<eyebase_api>" +
+                "<message>" +
+                "<id ><![CDATA[100]]></id>" +
+                "<text ><![CDATA[Logged out successfully.]]></text>" +
+                "<eyebase_message />" +
+                "</message>" +
+                "</eyebase_api>");
+            break;
+        case "mat":
+            response.end("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
+                "<eyebase_api>" +
+                "<mediaassettypes count=\"2\">" +
+                "<mediaassettype>" +
+                "<id ><![CDATA[501]]></id>" +
+                "<name ><![CDATA[Bilder]]></name>" +
+                "</mediaassettype>" +
+                "<mediaassettype>" +
+                "<id ><![CDATA[502]]></id>" +
+                "<name ><![CDATA[Dokumente]]></name>" +
+                "</mediaassettype>" +
+                "</mediaassettypes>" +
+                "</eyebase_api>");
+            break;
+        case "ftree":
+            response.end("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
+                "<eyebase_api>" +
+                "<folder>" +
+                "<id><![CDATA[1300]]></id>" +
+                "<name><![CDATA[DEMOFOLDER]]></name>" +
+                "<folderprops>" +
+                "<api_token><![CDATA[TEST_TOKEN]]></api_token> " +
+                "<inherit><![CDATA[on]]></inherit>" +
+                "</folderprops>" +
+                "<thumb/> " +
+                "<web/> " +
+                "<main/> " +
+                "<subfolders count=\"1\">" +
+                "<folder> " +
+                "<id><![CDATA[1301]]></id>" +
+                "<name><![CDATA[DEMO]]></name>" +
+                "<folderprops>" +
+                "<api_token><![CDATA[TEST_TOKEN]]></api_token>" +
+                "<inherit><![CDATA[on]]></inherit>" +
+                "</folderprops>" +
+                "<thumb/>" +
+                "<web/>" +
+                "<main/>" +
+                "<subfolders count=\"1\">" +
+                "<folder>" +
+                "<id><![CDATA[1302]]></id>" +
+                "<name><![CDATA[DEMO 2]]></name>" +
+                "<folderprops>" +
+                "<api_token><![CDATA[TEST_TOKEN]]></api_token>" +
+                "<inherit><![CDATA[on]]></inherit>" +
+                "</folderprops>" +
+                "<thumb/>" +
+                "<web/>" +
+                "<main/>" +
+                "<subfolders count=\"0\"></subfolders>" +
+                "</folder>" +
+                "</subfolders>" +
+                "</folder>" +
+                "</subfolders>" +
+                "</folder>" +
+                "</eyebase_api>");
             break;
     }
 });
