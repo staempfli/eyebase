@@ -34,9 +34,9 @@ class Api extends Eyebase
     /**
      * @return array|\SimpleXMLElement|string
      */
-    public function getLoginStatus()
+    public function logout()
     {
-        return $this->request(['qt' => 'loginstatus']);
+        return $this->request(['qt' => 'logout']);
     }
 
     /**
@@ -47,6 +47,14 @@ class Api extends Eyebase
         $params = ['qt' => 'ftree'];
 
         return $this->request($params);
+    }
+
+    /**
+     * @return array|\SimpleXMLElement|string
+     */
+    public function getLoginStatus()
+    {
+        return $this->request(['qt' => 'loginstatus']);
     }
 
     /**
