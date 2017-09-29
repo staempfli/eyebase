@@ -139,6 +139,7 @@ abstract class Eyebase
     /**
      * @param array $params
      * @return array|\SimpleXMLElement|string
+     * @throws \Exception
      */
     public function request(array $params = [])
     {
@@ -152,11 +153,11 @@ abstract class Eyebase
         $response = $this->client->get($url);
         $content = $response->getBody()->getContents();
 
-        if(!$this->isResponseValid($response)) {
+        if (!$this->isResponseValid($response)) {
             throw new \Exception(sprintf('Invalid Response: %s', $response->getReasonPhrase()));
         }
 
-        if($this->hasContentErrors($content)) {
+        if ($this->hasContentErrors($content)) {
             throw new \Exception(sprintf('Eyebase Error: %s', $this->convertContentToJson($content)));
         }
 
@@ -174,7 +175,7 @@ abstract class Eyebase
 
     private function isResponseValid(Response $response) : bool
     {
-        if($response->getReasonPhrase() === 'OK') {
+        if ($response->getReasonPhrase() === 'OK') {
             return true;
         }
         return false;
@@ -183,7 +184,7 @@ abstract class Eyebase
     private function hasContentErrors(string $content) : bool
     {
         $content = $this->convertContentToXml($content);
-        if($content->error) {
+        if ($content->error) {
             return true;
         }
         return false;

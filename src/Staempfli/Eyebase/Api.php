@@ -40,15 +40,25 @@ class Api extends Eyebase
     }
 
     /**
-     * @param int $folderId
      * @return array|\SimpleXMLElement|string
      */
-    public function getFolderTree(int $folderId = 0)
+    public function getFolderTree()
     {
         $params = ['qt' => 'ftree'];
 
+        return $this->request($params);
+    }
+
+    /**
+     * @param int $folderId
+     * @return array|\SimpleXMLElement|string
+     */
+    public function getKeyFolder(int $folderId = 0)
+    {
+        $params = ['qt' => 'r'];
+
         if ($folderId) {
-            $params['folderid'] = $folderId;
+            $params['keyfolder'] = $folderId;
         }
 
         return $this->request($params);
