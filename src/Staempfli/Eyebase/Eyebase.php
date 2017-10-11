@@ -149,16 +149,17 @@ abstract class Eyebase
             rtrim($this->getUrl(), '/'),
             http_build_query($parameters)
         );
-
         $response = $this->client->get($url);
         $content = $response->getBody()->getContents();
 
         if (!$this->isResponseValid($response)) {
             throw new \Exception(sprintf('Invalid Response: %s', $response->getReasonPhrase()));
         }
-
-        if ($this->hasContentErrors($content)) {
-            throw new \Exception(sprintf('Eyebase Error: %s', $this->convertContentToJson($content)));
+        $contentError = $this->getContentError($content);
+        if ($contentError) {
+            throw new \Exception(
+                sprintf('Eyebase Content Error: %s', $contentError['message']), $contentError['code']
+            );
         }
 
         return $this->formatOutput($content);
@@ -181,13 +182,16 @@ abstract class Eyebase
         return false;
     }
 
-    private function hasContentErrors(string $content) : bool
+    private function getContentError(string $content): array
     {
-        $content = $this->convertContentToXml($content);
-        if ($content->error) {
-            return true;
+        $content = $this->convertContentToArray($content);
+        if (isset($content['error'])) {
+            return [
+                'code' => $content['error']['id'],
+                'message' => $content['error']['message']
+            ];
         }
-        return false;
+        return [];
     }
 
     /**
