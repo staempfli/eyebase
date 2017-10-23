@@ -54,7 +54,7 @@ class ApiTest extends PHPUnit_Framework_TestCase
         try {
             $this->api->login('api', 'test');
         } catch (\Exception $e) {
-            $this->assertSame('Eyebase Error: {"error":{"id":"300","message":"Login error. For details see content of the eyebase_message tag.","eyebase_message":"Benutzername oder Passwort ungueltig."}}', $e->getMessage());
+            $this->assertSame('Benutzername oder Passwort ungueltig.', $e->getMessage());
         }
     }
 
