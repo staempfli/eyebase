@@ -7,6 +7,12 @@ namespace Staempfli\Eyebase;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use Staempfli\Eyebase\Exception\ContentErrorException;
+use Staempfli\Eyebase\Exception\EmptyFolderException;
+use Staempfli\Eyebase\Exception\InvalidResponseException;
+use Staempfli\Eyebase\Exception\LoginErrorException;
+use Symfony\Component\Process\Exception\LogicException;
 
 /**
  * Class Eyebase
@@ -15,6 +21,11 @@ use GuzzleHttp\Psr7\Response;
 abstract class Eyebase
 {
     const DEFAULT_OUTPUT_FORMAT = 'xml';
+
+    const ERROR_CODE_EMPTY_FOLDER = 260;
+
+    const ERROR_CODE_LOGIN_ERROR = 300;
+
     /**
      * @var Client
      */
@@ -151,17 +162,8 @@ abstract class Eyebase
         );
         $response = $this->client->get($url);
         $content = $response->getBody()->getContents();
-
-        if (!$this->isResponseValid($response)) {
-            throw new \Exception(sprintf('Invalid Response: %s', $response->getReasonPhrase()));
-        }
-        $contentError = $this->getContentError($content);
-        if ($contentError) {
-            throw new \Exception(
-                sprintf('Eyebase Content Error: %s', $contentError['message']), $contentError['code']
-            );
-        }
-
+        $this->validateResponse($response);
+        $this->validateContent($content);
         return $this->formatOutput($content);
     }
 
@@ -174,24 +176,35 @@ abstract class Eyebase
         return array_filter($params);
     }
 
-    private function isResponseValid(Response $response) : bool
+    private function validateResponse(ResponseInterface $response)
     {
-        if ($response->getReasonPhrase() === 'OK') {
-            return true;
+        if ($response->getReasonPhrase() !== 'OK') {
+            throw new InvalidResponseException(sprintf('%s', $response->getReasonPhrase()));
         }
-        return false;
     }
 
-    private function getContentError(string $content): array
+    /**
+     * @param string $content
+     * @throws EmptyFolderException
+     * @throws LoginErrorException
+     * @throws \Exception
+     */
+    private function validateContent(string $content)
     {
-        $content = $this->convertContentToArray($content);
-        if (isset($content['error'])) {
-            return [
-                'code' => $content['error']['id'],
-                'message' => $content['error']['message']
-            ];
+        $xml = $this->convertContentToXml($content);
+        if (isset($xml->error)) {
+            switch ((int) $xml->error->id) {
+                case self::ERROR_CODE_EMPTY_FOLDER:
+                    throw new EmptyFolderException((string) $xml->error->message);
+                    break;
+                case self::ERROR_CODE_LOGIN_ERROR;
+                    throw new LoginErrorException((string) $xml->error->eyebase_message);
+                    break;
+                default:
+                    throw new \Exception($this->convertContentToJson($content));
+                    break;
+            }
         }
-        return [];
     }
 
     /**
