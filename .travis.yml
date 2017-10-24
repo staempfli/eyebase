@@ -19,11 +19,19 @@ php:
 node_js:
   - 6
 
-before_script:
+cache:
+  directories:
+    - bundle
+
+before_install:
+  - gem update bundler
   - ./tests/server/start_server.sh
   - sleep 5
-  - composer update
-  - sleep 5
+
+install:
+  - composer install
+
+before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
