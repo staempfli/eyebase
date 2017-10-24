@@ -115,6 +115,32 @@ app.get("/webmill.php", function (request, response) {
                 "</folder>" +
                 "</eyebase_api>");
             break;
+        case 'lang':
+            response.end("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
+                "<eyebase_api>" +
+                "<languages count=\"1\">" +
+                "<language>" +
+                "<id ><![CDATA[1]]></id>" +
+                "<name ><![CDATA[English]]></name>" +
+                "</language>" +
+                "</languages>" +
+                "</eyebase_api>");
+            break;
+        case 'mat':
+            response.end("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
+                "<eyebase_api>" +
+                "<mediaassettypes count=\"2\">" +
+                "<mediaassettype>" +
+                "<id ><![CDATA[501]]></id>" +
+                "<name ><![CDATA[Bilder]]></name>" +
+                "</mediaassettype>" +
+                "<mediaassettype>" +
+                "<id ><![CDATA[502]]></id>" +
+                "<name ><![CDATA[Dokumente]]></name>" +
+                "</mediaassettype>" +
+                "</mediaassettypes>" +
+                "</eyebase_api>");
+            break;
     }
 });
 

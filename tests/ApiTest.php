@@ -81,4 +81,18 @@ class ApiTest extends PHPUnit_Framework_TestCase
         $this->assertSame(1301, (int) $result->folder->subfolders[0]->folder->id);
         $this->assertSame('DEMO', (string) $result->folder->subfolders[0]->folder->name);
     }
+
+    public function testGetAvailableLanguages()
+    {
+        $result = $this->api->getAvailableLanguages();
+        $this->assertSame(1, (int) $result->languages->language->id);
+        $this->assertSame('English', (string) $result->languages->language->name);
+    }
+
+    public function testGetAvailableMediaAssetTypes()
+    {
+        $result = $this->api->getAvailableMediaAssetTypes();
+        $this->assertSame(501, (int) $result->mediaassettypes[0]->mediaassettype->id);
+        $this->assertSame('Bilder', (string) $result->mediaassettypes[0]->mediaassettype->name);
+    }
 }
