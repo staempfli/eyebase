@@ -12,6 +12,18 @@ class ApiTest extends PHPUnit_Framework_TestCase
         parent::__construct();
     }
 
+    public function testSetToken()
+    {
+        $this->api->setToken('DEMO');
+        $this->assertSame('DEMO', $this->api->getToken());
+    }
+
+    public function testSetUrl()
+    {
+        $this->api->setUrl('http://localhost:8080');
+        $this->assertSame('http://localhost:8080', $this->api->getUrl());
+    }
+
     public function testDefaultOutputFormat()
     {
         $this->assertSame('xml', $this->api->getOutputFormat());
