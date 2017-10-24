@@ -1,4 +1,13 @@
-language: php
+env:
+  global:
+    - CC_TEST_REPORTER_ID=e829bf507687e499cd7571473ac8b334b457e4fb88990c906123520b9fc5d3f9
+
+language:
+  - php
+  - ruby
+
+rvm:
+  - 2.2.0
 
 sudo: false
 
@@ -14,5 +23,14 @@ before_script:
   - ./tests/server/start_server.sh
   - sleep 5
   - composer update
+  - sleep 5
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 
-script: vendor/bin/phpunit
+script:
+  - vendor/bin/phpunit
+  - bundle exec rspec
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

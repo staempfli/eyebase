@@ -2,6 +2,8 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e2a3cf45edfc4b18aebfaaefa610699e)](https://www.codacy.com/app/Staempfli/eyebase?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=staempfli/eyebase&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.org/staempfli/eyebase.svg?branch=master)](https://travis-ci.org/staempfli/eyebase)
+[![Maintainability](https://api.codeclimate.com/v1/badges/5a81c2e0d57eb6f127ad/maintainability)](https://codeclimate.com/github/staempfli/eyebase/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/5a81c2e0d57eb6f127ad/test_coverage)](https://codeclimate.com/github/staempfli/eyebase/test_coverage)
 
 Library to fetch information from [Eyebase](https://www.eyebase.com/) Api's
 
