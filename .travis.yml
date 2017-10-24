@@ -4,10 +4,6 @@ env:
 
 language:
   - php
-  - ruby
-
-rvm:
-  - 2.2.0
 
 sudo: false
 
@@ -19,26 +15,17 @@ php:
 node_js:
   - 6
 
-cache:
-  directories:
-    - bundle
-
 before_install:
-  - gem update bundler
   - ./tests/server/start_server.sh
   - sleep 5
 
 install:
   - composer install
 
-before_script:
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
-  - ./cc-test-reporter before-build
+addons:
+  code_climate:
+    repo_token: $CC_TEST_REPORTER_ID
 
 script:
   - vendor/bin/phpunit
-  - bundle exec rspec
-
-after_script:
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  - vendor/bin/test-reporter
