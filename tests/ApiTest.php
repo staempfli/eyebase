@@ -107,4 +107,28 @@ class ApiTest extends PHPUnit_Framework_TestCase
         $this->assertSame(501, (int) $result->mediaassettypes[0]->mediaassettype->id);
         $this->assertSame('Bilder', (string) $result->mediaassettypes[0]->mediaassettype->name);
     }
+
+    public function testFullTextSearch()
+    {
+        $result = $this->api->fullTextSearch('test');
+        $this->assertSame(20152, (int) $result->mediaassets[0]->mediaasset->item_id);
+        $this->assertSame('test.jpg', (string) $result->mediaassets[0]->mediaasset->original_filename);
+        $this->assertSame('TEST', (string) $result->mediaassets[0]->mediaasset->beschreibung);
+    }
+
+    public function testMediaAssetDetails()
+    {
+        $result = $this->api->getMediaAssetDetails(20152);
+        $this->assertSame(20152, (int) $result->mediaasset->item_id);
+        $this->assertSame('test.jpg', (string) $result->mediaasset->original_filename);
+        $this->assertSame('TEST', (string) $result->mediaasset->beschreibung);
+    }
+
+    public function testKeyFolder()
+    {
+        $result = $this->api->getKeyFolder(20152);
+        $this->assertSame(20152, (int) $result->mediaassets[0]->mediaasset->item_id);
+        $this->assertSame('test.jpg', (string) $result->mediaassets[0]->mediaasset->original_filename);
+        $this->assertSame('TEST', (string) $result->mediaassets[0]->mediaasset->beschreibung);
+    }
 }
