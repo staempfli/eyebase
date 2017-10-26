@@ -131,4 +131,22 @@ class ApiTest extends PHPUnit_Framework_TestCase
         $this->assertSame('test.jpg', (string) $result->mediaassets[0]->mediaasset->original_filename);
         $this->assertSame('TEST', (string) $result->mediaassets[0]->mediaasset->beschreibung);
     }
+
+    public function testInvalidKeyFolder()
+    {
+        try {
+            $this->api->getKeyFolder(49862);
+        } catch (\Staempfli\Eyebase\Exception\InvalidFolderException $e) {
+            $this->assertSame('The specified value 49862 for the folderid is invalid.', $e->getMessage());
+        }
+    }
+
+    public function testEmptyKeyFolder()
+    {
+        try {
+            $this->api->getKeyFolder(49800);
+        } catch (\Staempfli\Eyebase\Exception\EmptyFolderException $e) {
+            $this->assertSame('No media assets found matching your search criteria.', $e->getMessage());
+        }
+    }
 }
