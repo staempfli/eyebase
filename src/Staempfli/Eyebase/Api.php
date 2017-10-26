@@ -108,6 +108,9 @@ class Api extends Eyebase
      */
     public function fullTextSearch(string $text)
     {
-        return $this->request(['ftx' => $text]);
+        return $this->request([
+            'qt' => 'r',
+            'ftx' => $text,
+        ]);
     }
 }
