@@ -191,6 +191,8 @@ abstract class Eyebase
      * @throws EmptyFolderException
      * @throws LoginErrorException
      * @throws \Exception
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.CognitiveComplexity)
      */
     private function validateContent(string $content)
     {
