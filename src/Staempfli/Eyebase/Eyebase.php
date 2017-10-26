@@ -10,6 +10,7 @@ use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Staempfli\Eyebase\Exception\ContentErrorException;
 use Staempfli\Eyebase\Exception\EmptyFolderException;
+use Staempfli\Eyebase\Exception\InvalidFolderException;
 use Staempfli\Eyebase\Exception\InvalidResponseException;
 use Staempfli\Eyebase\Exception\LoginErrorException;
 use Symfony\Component\Process\Exception\LogicException;
@@ -23,6 +24,8 @@ abstract class Eyebase
     const DEFAULT_OUTPUT_FORMAT = 'xml';
 
     const ERROR_CODE_EMPTY_FOLDER = 260;
+
+    const ERROR_CODE_INVALID_FOLDER = 290;
 
     const ERROR_CODE_LOGIN_ERROR = 300;
 
@@ -196,6 +199,9 @@ abstract class Eyebase
             switch ((int) $xml->error->id) {
                 case self::ERROR_CODE_EMPTY_FOLDER:
                     throw new EmptyFolderException((string) $xml->error->message);
+                    break;
+                case self::ERROR_CODE_INVALID_FOLDER:
+                    throw new InvalidFolderException((string) $xml->error->message);
                     break;
                 case self::ERROR_CODE_LOGIN_ERROR;
                     throw new LoginErrorException((string) $xml->error->eyebase_message);
