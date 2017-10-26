@@ -192,7 +192,6 @@ abstract class Eyebase
      * @throws LoginErrorException
      * @throws \Exception
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.CognitiveComplexity)
      */
     private function validateContent(string $content)
     {
