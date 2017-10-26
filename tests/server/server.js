@@ -5,7 +5,6 @@ let app = require("express")();
 /* eslint complexity: "off" */
 app.get("/webmill.php", function (request, response) {
     var query = request.query.qt;
-    console.log(request.query);
     switch (query) {
         case "version":
             response.end("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
