@@ -6,14 +6,14 @@
 namespace Staempfli\Eyebase;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Exception\TooManyRedirectsException;
 use Psr\Http\Message\ResponseInterface;
 use Staempfli\Eyebase\Exception\ContentErrorException;
 use Staempfli\Eyebase\Exception\EmptyFolderException;
 use Staempfli\Eyebase\Exception\InvalidFolderException;
 use Staempfli\Eyebase\Exception\InvalidResponseException;
+use Staempfli\Eyebase\Exception\InvalidXmlContentException;
 use Staempfli\Eyebase\Exception\LoginErrorException;
-use Symfony\Component\Process\Exception\LogicException;
 
 /**
  * Class Eyebase
@@ -22,12 +22,10 @@ use Symfony\Component\Process\Exception\LogicException;
 abstract class Eyebase
 {
     const DEFAULT_OUTPUT_FORMAT = 'xml';
-
     const ERROR_CODE_EMPTY_FOLDER = 260;
-
     const ERROR_CODE_INVALID_FOLDER = 290;
-
     const ERROR_CODE_LOGIN_ERROR = 300;
+    const MAX_REQUEST_ATTEMPTS = 5;
 
     /**
      * @var Client
@@ -50,6 +48,10 @@ abstract class Eyebase
      */
     private $token = '';
     /**
+     * @var Logger
+     */
+    private $logger;
+    /**
      * @var string
      */
     private $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
@@ -69,6 +71,7 @@ abstract class Eyebase
     public function __construct(string $url = '', string $token = '')
     {
         $this->client = new Client(['cookies' => true]);
+        $this->logger = new Logger();
         $this->setUrl($url);
         $this->setToken($token);
     }
@@ -158,16 +161,23 @@ abstract class Eyebase
     public function request(array $params = [])
     {
         $parameters = array_merge($this->getDefaultParams(), $params);
-        $url = sprintf(
-            '%s/webmill.php?%s',
-            rtrim($this->getUrl(), '/'),
-            http_build_query($parameters)
-        );
-        $response = $this->client->get($url);
-        $content = $response->getBody()->getContents();
-        $this->validateResponse($response);
-        $this->validateContent($content);
-        return $this->formatOutput($content);
+        $url = sprintf('%s/webmill.php?%s', rtrim($this->getUrl(), '/'), http_build_query($parameters));
+        $requestAttempts = 0;
+        $errors = [];
+        do {
+            try {
+                $requestAttempts++;
+                return $this->getRequestResult($url);
+            } catch (\Exception $e) {
+                if (!$this->apiClientNotAvailableException($e)) {
+                    throw $e;
+                }
+                $message = sprintf("Error Request Url: %s\nMessage: %s", $url, $e->getMessage());
+                $this->logger->error($e->getCode(), $message);
+                $errors[] = $e->getMessage();
+            }
+        } while ($requestAttempts < self::MAX_REQUEST_ATTEMPTS);
+        throw new \Exception(sprintf("Eyebase Request Failed with errors:\n%s", implode("\n", $errors)));
     }
 
     protected function getDefaultParams() : array
@@ -177,6 +187,30 @@ abstract class Eyebase
         $params['ben_kennung'] = $this->getPassword();
         $params['token'] = $this->getToken();
         return array_filter($params);
+    }
+
+    private function apiClientNotAvailableException(\Exception $exception): bool
+    {
+        if ($exception instanceof InvalidXmlContentException) {
+            return true;
+        }
+        if ($exception instanceof TooManyRedirectsException) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param string $url
+     * @return array|\SimpleXMLElement|string
+     */
+    private function getRequestResult(string $url)
+    {
+        $response = $this->client->get($url);
+        $content = $response->getBody()->getContents();
+        $this->validateResponse($response);
+        $this->validateContent($content);
+        return $this->formatOutput($content);
     }
 
     private function validateResponse(ResponseInterface $response)
@@ -195,6 +229,10 @@ abstract class Eyebase
      */
     private function validateContent(string $content)
     {
+        if (false === @simplexml_load_string($content, null)) {
+            throw new InvalidXmlContentException(
+                sprintf("Error trying to convert following content to xml: \n%s", $content));
+        }
         $xml = $this->convertContentToXml($content);
         if (isset($xml->error)) {
             switch ((int) $xml->error->id) {
