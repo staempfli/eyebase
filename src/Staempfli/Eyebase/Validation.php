@@ -40,10 +40,7 @@ class Validation
 
     /**
      * @param string $content
-     * @throws EmptyFolderException
-     * @throws LoginErrorException
-     * @throws \Exception
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @throws InvalidXmlContentException
      */
     public function validateContent(string $content)
     {
@@ -53,20 +50,33 @@ class Validation
         }
         $xml = $this->contentConverter->convertContentToXml($content);
         if (isset($xml->error)) {
-            switch ((int) $xml->error->id) {
-                case self::ERROR_CODE_EMPTY_FOLDER:
-                    throw new EmptyFolderException((string) $xml->error->message);
-                    break;
-                case self::ERROR_CODE_INVALID_FOLDER:
-                    throw new InvalidFolderException((string) $xml->error->message);
-                    break;
-                case self::ERROR_CODE_LOGIN_ERROR;
-                    throw new LoginErrorException((string) $xml->error->eyebase_message);
-                    break;
-                default:
-                    throw new \Exception($this->contentConverter->convertContentToJson($content));
-                    break;
-            }
+            $this->throwXmlContentErrorException($xml, $content);
+        }
+    }
+
+    /**
+     * @param $xml
+     * @param string $content
+     * @throws EmptyFolderException
+     * @throws InvalidFolderException
+     * @throws LoginErrorException
+     * @throws \Exception
+     */
+    private function throwXmlContentErrorException($xml, string $content)
+    {
+        switch ((int) $xml->error->id) {
+            case self::ERROR_CODE_EMPTY_FOLDER:
+                throw new EmptyFolderException((string) $xml->error->message);
+                break;
+            case self::ERROR_CODE_INVALID_FOLDER:
+                throw new InvalidFolderException((string) $xml->error->message);
+                break;
+            case self::ERROR_CODE_LOGIN_ERROR;
+                throw new LoginErrorException((string) $xml->error->eyebase_message);
+                break;
+            default:
+                throw new \Exception($this->contentConverter->convertContentToJson($content));
+                break;
         }
     }
 }
