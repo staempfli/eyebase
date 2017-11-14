@@ -24,7 +24,7 @@ class Logger
     public function error($code, string $message)
     {
         $errorLogFilename = $this->logsPath . '/error.log';
-        $message = sprintf("[%s] Error with code: %s \n %s", date("d-m-Y h:i:s"), $code, $message);
+        $message = sprintf("[%s] Error with code: %s\n%s\n", date("d-m-Y h:i:s"), $code, $message);
         file_put_contents($errorLogFilename, $message, FILE_APPEND);
     }
 
