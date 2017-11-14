@@ -6,14 +6,8 @@
 namespace Staempfli\Eyebase;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Response;
-use Psr\Http\Message\ResponseInterface;
-use Staempfli\Eyebase\Exception\ContentErrorException;
-use Staempfli\Eyebase\Exception\EmptyFolderException;
-use Staempfli\Eyebase\Exception\InvalidFolderException;
-use Staempfli\Eyebase\Exception\InvalidResponseException;
-use Staempfli\Eyebase\Exception\LoginErrorException;
-use Symfony\Component\Process\Exception\LogicException;
+use GuzzleHttp\Exception\TooManyRedirectsException;
+use Staempfli\Eyebase\Exception\InvalidXmlContentException;
 
 /**
  * Class Eyebase
@@ -22,12 +16,7 @@ use Symfony\Component\Process\Exception\LogicException;
 abstract class Eyebase
 {
     const DEFAULT_OUTPUT_FORMAT = 'xml';
-
-    const ERROR_CODE_EMPTY_FOLDER = 260;
-
-    const ERROR_CODE_INVALID_FOLDER = 290;
-
-    const ERROR_CODE_LOGIN_ERROR = 300;
+    const MAX_REQUEST_ATTEMPTS = 5;
 
     /**
      * @var Client
@@ -50,9 +39,17 @@ abstract class Eyebase
      */
     private $token = '';
     /**
-     * @var string
+     * @var Logger
      */
-    private $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
+    private $logger;
+    /**
+     * @var ContentConverter
+     */
+    private $contentConverter;
+    /**
+     * @var Validation
+     */
+    private $validation;
     /**
      * @var array
      */
@@ -60,6 +57,10 @@ abstract class Eyebase
         'fx' => 'api',
         'qt' => 'r'
     ];
+    /**
+     * @var string
+     */
+    private $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
 
     /**
      * Eyebase constructor.
@@ -69,6 +70,9 @@ abstract class Eyebase
     public function __construct(string $url = '', string $token = '')
     {
         $this->client = new Client(['cookies' => true]);
+        $this->logger = new Logger();
+        $this->contentConverter = new ContentConverter();
+        $this->validation = new Validation();
         $this->setUrl($url);
         $this->setToken($token);
     }
@@ -78,11 +82,7 @@ abstract class Eyebase
         return $this->url;
     }
 
-    /**
-     * @param string $url
-     * @return $this
-     */
-    public function setUrl(string $url)
+    public function setUrl(string $url) : Eyebase
     {
         $this->url = $url;
         return $this;
@@ -93,11 +93,7 @@ abstract class Eyebase
         return $this->username;
     }
 
-    /**
-     * @param string $username
-     * @return $this
-     */
-    public function setUsername(string $username)
+    public function setUsername(string $username)  : Eyebase
     {
         $this->username = $username;
         return $this;
@@ -108,11 +104,7 @@ abstract class Eyebase
         return $this->password;
     }
 
-    /**
-     * @param string $password
-     * @return $this
-     */
-    public function setPassword(string $password)
+    public function setPassword(string $password) : Eyebase
     {
         $this->password = $password;
         return $this;
@@ -158,16 +150,23 @@ abstract class Eyebase
     public function request(array $params = [])
     {
         $parameters = array_merge($this->getDefaultParams(), $params);
-        $url = sprintf(
-            '%s/webmill.php?%s',
-            rtrim($this->getUrl(), '/'),
-            http_build_query($parameters)
-        );
-        $response = $this->client->get($url);
-        $content = $response->getBody()->getContents();
-        $this->validateResponse($response);
-        $this->validateContent($content);
-        return $this->formatOutput($content);
+        $url = sprintf('%s/webmill.php?%s', rtrim($this->getUrl(), '/'), http_build_query($parameters));
+        $requestAttempts = 0;
+        $errors = [];
+        do {
+            try {
+                $requestAttempts++;
+                return $this->getRequestResult($url);
+            } catch (\Exception $e) {
+                if (!$this->apiClientNotAvailableException($e)) {
+                    throw $e;
+                }
+                $message = sprintf("Error Request Url: %s\nMessage: %s", $url, $e->getMessage());
+                $this->logger->error($e->getCode(), $message);
+                $errors[] = $e->getMessage();
+            }
+        } while ($requestAttempts < self::MAX_REQUEST_ATTEMPTS);
+        throw new \Exception(sprintf("Eyebase Request Failed with errors:\n%s", implode("\n", $errors)));
     }
 
     protected function getDefaultParams() : array
@@ -179,39 +178,28 @@ abstract class Eyebase
         return array_filter($params);
     }
 
-    private function validateResponse(ResponseInterface $response)
+    private function apiClientNotAvailableException(\Exception $exception): bool
     {
-        if ($response->getReasonPhrase() !== 'OK') {
-            throw new InvalidResponseException(sprintf('%s', $response->getReasonPhrase()));
+        if ($exception instanceof InvalidXmlContentException) {
+            return true;
         }
+        if ($exception instanceof TooManyRedirectsException) {
+            return true;
+        }
+        return false;
     }
 
     /**
-     * @param string $content
-     * @throws EmptyFolderException
-     * @throws LoginErrorException
-     * @throws \Exception
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @param string $url
+     * @return array|\SimpleXMLElement|string
      */
-    private function validateContent(string $content)
+    private function getRequestResult(string $url)
     {
-        $xml = $this->convertContentToXml($content);
-        if (isset($xml->error)) {
-            switch ((int) $xml->error->id) {
-                case self::ERROR_CODE_EMPTY_FOLDER:
-                    throw new EmptyFolderException((string) $xml->error->message);
-                    break;
-                case self::ERROR_CODE_INVALID_FOLDER:
-                    throw new InvalidFolderException((string) $xml->error->message);
-                    break;
-                case self::ERROR_CODE_LOGIN_ERROR;
-                    throw new LoginErrorException((string) $xml->error->eyebase_message);
-                    break;
-                default:
-                    throw new \Exception($this->convertContentToJson($content));
-                    break;
-            }
-        }
+        $response = $this->client->get($url);
+        $content = $response->getBody()->getContents();
+        $this->validation->validateResponse($response);
+        $this->validation->validateContent($content);
+        return $this->formatOutput($content);
     }
 
     /**
@@ -222,13 +210,13 @@ abstract class Eyebase
     {
         switch ($this->getOutputFormat()) {
             case 'xml':
-                $output = $this->convertContentToXml($content);
+                $output = $this->contentConverter->convertContentToXml($content);
                 break;
             case 'json':
-                $output = $this->convertContentToJson($content);
+                $output = $this->contentConverter->convertContentToJson($content);
                 break;
             case 'array':
-                $output = $this->convertContentToArray($content);
+                $output = $this->contentConverter->convertContentToArray($content);
                 break;
             default:
                 $output = $content;
@@ -237,20 +225,4 @@ abstract class Eyebase
         return $output;
     }
 
-    private function convertContentToXml(string $content) : \SimpleXMLElement
-    {
-        return simplexml_load_string($content, null, LIBXML_NOCDATA);
-    }
-
-    private function convertContentToJson(string $content) : string
-    {
-        $xml = $this->convertContentToXml($content);
-        return json_encode($xml);
-    }
-
-    private function convertContentToArray(string $content) : array
-    {
-        $json = $this->convertContentToJson($content);
-        return json_decode($json, true);
-    }
 }
