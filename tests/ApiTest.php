@@ -6,10 +6,9 @@ class ApiTest extends PHPUnit_Framework_TestCase
 {
     private $api;
 
-    public function __construct()
+    public function setUp()
     {
         $this->api = new Api('http://localhost:8082', 'TEST_TOKEN');
-        parent::__construct();
     }
 
     public function testSetToken()

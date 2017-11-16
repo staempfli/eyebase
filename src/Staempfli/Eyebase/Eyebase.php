@@ -5,6 +5,7 @@
  */
 namespace Staempfli\Eyebase;
 
+use Doctrine\Instantiator\Exception\InvalidArgumentException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\TooManyRedirectsException;
 use Staempfli\Eyebase\Exception\InvalidXmlContentException;
@@ -39,10 +40,6 @@ abstract class Eyebase
      */
     private $token = '';
     /**
-     * @var Logger
-     */
-    private $logger;
-    /**
      * @var ContentConverter
      */
     private $contentConverter;
@@ -70,7 +67,6 @@ abstract class Eyebase
     public function __construct(string $url = '', string $token = '')
     {
         $this->client = new Client(['cookies' => true]);
-        $this->logger = new Logger();
         $this->contentConverter = new ContentConverter();
         $this->validation = new Validation();
         $this->setUrl($url);
@@ -161,8 +157,6 @@ abstract class Eyebase
                 if (!$this->apiClientNotAvailableException($e)) {
                     throw $e;
                 }
-                $message = sprintf("Error Request Url: %s\nMessage: %s", $url, $e->getMessage());
-                $this->logger->error($e->getCode(), $message);
                 $errors[] = $e->getMessage();
             }
         } while ($requestAttempts < self::MAX_REQUEST_ATTEMPTS);
@@ -219,7 +213,7 @@ abstract class Eyebase
                 $output = $this->contentConverter->convertContentToArray($content);
                 break;
             default:
-                $output = $content;
+                throw new InvalidArgumentException('Invalid output format!');
                 break;
         }
         return $output;
