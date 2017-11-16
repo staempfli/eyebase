@@ -46,7 +46,7 @@ class Validation
     {
         if (false === @simplexml_load_string($content, null)) {
             throw new InvalidXmlContentException(
-                sprintf("Error trying to convert following content to xml: \n%s", $content));
+                sprintf("Error trying to convert following content to xml: %s", $content));
         }
         $xml = $this->contentConverter->convertContentToXml($content);
         if (isset($xml->error)) {

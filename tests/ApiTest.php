@@ -4,6 +4,9 @@ use Staempfli\Eyebase\Api;
 
 class ApiTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @var Api
+     */
     private $api;
 
     public function setUp()
@@ -146,6 +149,38 @@ class ApiTest extends PHPUnit_Framework_TestCase
             $this->api->getKeyFolder(49800);
         } catch (\Staempfli\Eyebase\Exception\EmptyFolderException $e) {
             $this->assertSame('No media assets found matching your search criteria.', $e->getMessage());
+        }
+    }
+
+    public function testUndefinedError()
+    {
+        try {
+            $this->api->getKeyFolder(500);
+        } catch (\Exception $e) {
+            $this->assertSame('{"error":{"id":"999","message":"Undefined error","eyebase_message":{}}}', $e->getMessage());
+        }
+    }
+
+    public function testInvalidReasonPhraseException()
+    {
+        try {
+            $this->api->request(['qt' => 'no-content']);
+        } catch (\Staempfli\Eyebase\Exception\InvalidResponseException $e) {
+            $this->assertSame('No Content', $e->getMessage());
+        }
+    }
+
+    public function testInvalidXmlContentException()
+    {
+        try {
+            $this->api->request(['qt' => 'no-xml']);
+        } catch (\Exception $e) {
+            $this->assertSame('Eyebase Request Failed with errors:
+Error trying to convert following content to xml: <!doctype html><html lang="en"><head><meta charset="utf-8"></head><body>HTML Content</body></html>
+Error trying to convert following content to xml: <!doctype html><html lang="en"><head><meta charset="utf-8"></head><body>HTML Content</body></html>
+Error trying to convert following content to xml: <!doctype html><html lang="en"><head><meta charset="utf-8"></head><body>HTML Content</body></html>
+Error trying to convert following content to xml: <!doctype html><html lang="en"><head><meta charset="utf-8"></head><body>HTML Content</body></html>
+Error trying to convert following content to xml: <!doctype html><html lang="en"><head><meta charset="utf-8"></head><body>HTML Content</body></html>', $e->getMessage());
         }
     }
 }
