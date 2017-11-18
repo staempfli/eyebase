@@ -8,7 +8,6 @@
 
 namespace Staempfli\Eyebase\Exception;
 
-
 class InvalidXmlContentException extends \Exception
 {
 }

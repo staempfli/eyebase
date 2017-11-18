@@ -218,5 +218,4 @@ abstract class Eyebase
         }
         return $output;
     }
-
 }
