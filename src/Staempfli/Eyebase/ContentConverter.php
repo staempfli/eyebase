@@ -8,7 +8,6 @@
 
 namespace Staempfli\Eyebase;
 
-
 class ContentConverter
 {
     public function convertContentToArray(string $content) : array
@@ -27,5 +26,4 @@ class ContentConverter
     {
         return simplexml_load_string($content, null, LIBXML_NOCDATA);
     }
-
 }

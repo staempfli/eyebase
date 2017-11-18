@@ -160,6 +160,15 @@ app.get("/webmill.php", function (request, response) {
                     "<eyebase_message/>" +
                     "</error>" +
                     "</eyebase_api>");
+            } else if(request.query.keyfolder === "500") {
+                response.end("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
+                    "<eyebase_api>" +
+                    "<error>" +
+                    "<id><![CDATA[999]]></id>" +
+                    "<message><![CDATA[Undefined error]]></message>" +
+                    "<eyebase_message/>" +
+                    "</error>" +
+                    "</eyebase_api>");
             } else {
                 response.end("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
                     "<eyebase_api>" +
@@ -224,6 +233,18 @@ app.get("/webmill.php", function (request, response) {
                 "<picturepins/>" +
                 "</mediaasset>" +
                 "</eyebase_api>");
+            break;
+        case "no-content":
+                response.sendStatus(204);
+            break;
+        case "no-xml":
+            response.end("<!doctype html>" +
+                "<html lang=\"en\">" +
+                "<head>" +
+                "<meta charset=\"utf-8\">" +
+                "</head>" +
+                "<body>HTML Content</body>" +
+                "</html>");
             break;
     }
 });

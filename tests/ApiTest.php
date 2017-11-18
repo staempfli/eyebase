@@ -1,15 +1,19 @@
 <?php
 
-use Staempfli\Eyebase\Api;
+namespace Staempfli\Eyebase;
 
-class ApiTest extends PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class ApiTest extends TestCase
 {
+    /**
+     * @var Api
+     */
     private $api;
 
-    public function __construct()
+    public function setUp()
     {
         $this->api = new Api('http://localhost:8082', 'TEST_TOKEN');
-        parent::__construct();
     }
 
     public function testSetToken()
@@ -32,7 +36,7 @@ class ApiTest extends PHPUnit_Framework_TestCase
     public function testReturnResultAsSimpleXMLElement()
     {
         $result = $this->api->getApiVersion();
-        $this->assertInstanceOf(SimpleXMLElement::class, $result);
+        $this->assertInstanceOf(\SimpleXMLElement::class, $result);
     }
 
     public function testReturnResultAsArray()
@@ -63,11 +67,8 @@ class ApiTest extends PHPUnit_Framework_TestCase
 
     public function testLoginFailed()
     {
-        try {
-            $this->api->login('api', 'test');
-        } catch (\Exception $e) {
-            $this->assertSame('Benutzername oder Passwort ungueltig.', $e->getMessage());
-        }
+        $this->expectException(\Exception::class);
+        $this->api->login('api', 'test');
     }
 
     public function testLogout()
@@ -134,19 +135,31 @@ class ApiTest extends PHPUnit_Framework_TestCase
 
     public function testInvalidKeyFolder()
     {
-        try {
-            $this->api->getKeyFolder(49862);
-        } catch (\Staempfli\Eyebase\Exception\InvalidFolderException $e) {
-            $this->assertSame('The specified value 49862 for the folderid is invalid.', $e->getMessage());
-        }
+        $this->expectException(\Staempfli\Eyebase\Exception\InvalidFolderException::class);
+        $this->api->getKeyFolder(49862);
     }
 
     public function testEmptyKeyFolder()
     {
-        try {
-            $this->api->getKeyFolder(49800);
-        } catch (\Staempfli\Eyebase\Exception\EmptyFolderException $e) {
-            $this->assertSame('No media assets found matching your search criteria.', $e->getMessage());
-        }
+        $this->expectException(\Staempfli\Eyebase\Exception\EmptyFolderException::class);
+        $this->api->getKeyFolder(49800);
+    }
+
+    public function testUndefinedError()
+    {
+        $this->expectException(\Exception::class);
+        $this->api->getKeyFolder(500);
+    }
+
+    public function testInvalidReasonPhraseException()
+    {
+        $this->expectException(\Staempfli\Eyebase\Exception\InvalidResponseException::class);
+        $this->api->request(['qt' => 'no-content']);
+    }
+
+    public function testInvalidXmlContentException()
+    {
+        $this->expectException(\Exception::class);
+        $this->api->request(['qt' => 'no-xml']);
     }
 }
