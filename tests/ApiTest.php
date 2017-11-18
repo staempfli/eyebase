@@ -1,8 +1,10 @@
 <?php
 
-use Staempfli\Eyebase\Api;
+namespace Staempfli\Eyebase;
 
-class ApiTest extends PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class ApiTest extends TestCase
 {
     /**
      * @var Api
@@ -34,7 +36,7 @@ class ApiTest extends PHPUnit_Framework_TestCase
     public function testReturnResultAsSimpleXMLElement()
     {
         $result = $this->api->getApiVersion();
-        $this->assertInstanceOf(SimpleXMLElement::class, $result);
+        $this->assertInstanceOf(\SimpleXMLElement::class, $result);
     }
 
     public function testReturnResultAsArray()
@@ -65,11 +67,8 @@ class ApiTest extends PHPUnit_Framework_TestCase
 
     public function testLoginFailed()
     {
-        try {
-            $this->api->login('api', 'test');
-        } catch (\Exception $e) {
-            $this->assertSame('Benutzername oder Passwort ungueltig.', $e->getMessage());
-        }
+        $this->expectException(\Exception::class);
+        $this->api->login('api', 'test');
     }
 
     public function testLogout()
@@ -136,51 +135,31 @@ class ApiTest extends PHPUnit_Framework_TestCase
 
     public function testInvalidKeyFolder()
     {
-        try {
-            $this->api->getKeyFolder(49862);
-        } catch (\Staempfli\Eyebase\Exception\InvalidFolderException $e) {
-            $this->assertSame('The specified value 49862 for the folderid is invalid.', $e->getMessage());
-        }
+        $this->expectException(\Staempfli\Eyebase\Exception\InvalidFolderException::class);
+        $this->api->getKeyFolder(49862);
     }
 
     public function testEmptyKeyFolder()
     {
-        try {
-            $this->api->getKeyFolder(49800);
-        } catch (\Staempfli\Eyebase\Exception\EmptyFolderException $e) {
-            $this->assertSame('No media assets found matching your search criteria.', $e->getMessage());
-        }
+        $this->expectException(\Staempfli\Eyebase\Exception\EmptyFolderException::class);
+        $this->api->getKeyFolder(49800);
     }
 
     public function testUndefinedError()
     {
-        try {
-            $this->api->getKeyFolder(500);
-        } catch (\Exception $e) {
-            $this->assertSame('{"error":{"id":"999","message":"Undefined error","eyebase_message":{}}}', $e->getMessage());
-        }
+        $this->expectException(\Exception::class);
+        $this->api->getKeyFolder(500);
     }
 
     public function testInvalidReasonPhraseException()
     {
-        try {
-            $this->api->request(['qt' => 'no-content']);
-        } catch (\Staempfli\Eyebase\Exception\InvalidResponseException $e) {
-            $this->assertSame('No Content', $e->getMessage());
-        }
+        $this->expectException(\Staempfli\Eyebase\Exception\InvalidResponseException::class);
+        $this->api->request(['qt' => 'no-content']);
     }
 
     public function testInvalidXmlContentException()
     {
-        try {
-            $this->api->request(['qt' => 'no-xml']);
-        } catch (\Exception $e) {
-            $this->assertSame('Eyebase Request Failed with errors:
-Error trying to convert following content to xml: <!doctype html><html lang="en"><head><meta charset="utf-8"></head><body>HTML Content</body></html>
-Error trying to convert following content to xml: <!doctype html><html lang="en"><head><meta charset="utf-8"></head><body>HTML Content</body></html>
-Error trying to convert following content to xml: <!doctype html><html lang="en"><head><meta charset="utf-8"></head><body>HTML Content</body></html>
-Error trying to convert following content to xml: <!doctype html><html lang="en"><head><meta charset="utf-8"></head><body>HTML Content</body></html>
-Error trying to convert following content to xml: <!doctype html><html lang="en"><head><meta charset="utf-8"></head><body>HTML Content</body></html>', $e->getMessage());
-        }
+        $this->expectException(\Exception::class);
+        $this->api->request(['qt' => 'no-xml']);
     }
 }

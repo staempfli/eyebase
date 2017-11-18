@@ -234,10 +234,10 @@ app.get("/webmill.php", function (request, response) {
                 "</mediaasset>" +
                 "</eyebase_api>");
             break;
-        case 'no-content':
+        case "no-content":
                 response.sendStatus(204);
             break;
-        case 'no-xml':
+        case "no-xml":
             response.end("<!doctype html>" +
                 "<html lang=\"en\">" +
                 "<head>" +
