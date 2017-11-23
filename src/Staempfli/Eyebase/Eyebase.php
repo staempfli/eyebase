@@ -8,7 +8,6 @@ namespace Staempfli\Eyebase;
 use Doctrine\Instantiator\Exception\InvalidArgumentException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\TooManyRedirectsException;
-use Staempfli\Eyebase\Exception\InvalidXmlContentException;
 
 /**
  * Class Eyebase
@@ -174,9 +173,6 @@ abstract class Eyebase
 
     private function apiClientNotAvailableException(\Exception $exception): bool
     {
-        if ($exception instanceof InvalidXmlContentException) {
-            return true;
-        }
         if ($exception instanceof TooManyRedirectsException) {
             return true;
         }
