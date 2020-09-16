@@ -1,5 +1,6 @@
 # Eyebase
 
+[![Project Status: Abandoned – Initial development has started, but there has not yet been a stable, usable release; the project has been abandoned and the author(s) do not intend on continuing development.](http://www.repostatus.org/badges/latest/abandoned.svg)](http://www.repostatus.org/#abandoned)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e2a3cf45edfc4b18aebfaaefa610699e)](https://www.codacy.com/app/Staempfli/eyebase?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=staempfli/eyebase&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.org/staempfli/eyebase.svg?branch=master)](https://travis-ci.org/staempfli/eyebase)
 [![Maintainability](https://api.codeclimate.com/v1/badges/5a81c2e0d57eb6f127ad/maintainability)](https://codeclimate.com/github/staempfli/eyebase/maintainability)
